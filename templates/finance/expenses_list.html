@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty_state, confirm_delete_form %}
+{% block title %}المصاريف العامة{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>المصاريف العامة</h1>
+    <p class="page-subtitle">إجمالي: {{ total | currency }}</p>
+  </div>
+  <a href="{{ url_for('finance.expenses_add') }}" class="btn btn-primary btn-lg">+ تسجيل مصروف</a>
+</div>
+
+{% if rows %}
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>التاريخ</th><th>النوع</th><th>الوصف</th><th>المبلغ</th><th>إجراءات</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.date }}</td>
+      <td>{{ r.expense_type }}</td>
+      <td>{{ r.description or '-' }}</td>
+      <td class="num">{{ r.amount | currency }}</td>
+      <td class="actions-cell">
+        <a href="{{ url_for('finance.expenses_edit', item_id=r.id) }}" class="btn btn-ghost btn-sm">تعديل</a>
+        {{ confirm_delete_form(url_for('finance.expenses_delete', item_id=r.id), 'حذف') }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+{{ empty_state('مفيش مصاريف عامة مسجلة لسه.', 'تسجيل مصروف', url_for('finance.expenses_add')) }}
+{% endif %}
+{% endblock %}

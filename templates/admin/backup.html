@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}النسخ الاحتياطية{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>النسخ الاحتياطية</h1>
+  <form method="POST" action="{{ url_for('main.backup_create') }}" style="display:inline">
+    <button type="submit" class="btn btn-primary btn-lg">إنشاء نسخة احتياطية الآن</button>
+  </form>
+</div>
+
+<div class="card">
+  <p class="muted">مكان ملف البيانات: <code>{{ db_path }}</code></p>
+</div>
+
+{% if backups %}
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>اسم الملف</th><th>الحجم</th></tr></thead>
+  <tbody>
+    {% for b in backups %}
+    <tr>
+      <td>{{ b.name }}</td>
+      <td>{{ (b.stat().st_size / 1024)|round(1) }} KB</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="muted">مفيش نسخ احتياطية لسه. اضغط الزر فوق عشان تعمل واحدة.</p>
+{% endif %}
+{% endblock %}

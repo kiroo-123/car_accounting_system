@@ -1,0 +1,6 @@
+﻿__pycache__/
+*.pyc
+*.lock
+data/*.xlsx
+backups/*.xlsx
+.env

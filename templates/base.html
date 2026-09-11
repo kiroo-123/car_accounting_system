@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{{ company_name }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <button class="mobile-nav-toggle" id="navToggle" type="button" aria-label="القائمة">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-mark">🚐</span>
+      <span class="brand-text">{{ company_name }}</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('main.dashboard') }}" class="{{ 'active' if request.endpoint == 'main.dashboard' }}">الرئيسية</a>
+      <a href="{{ url_for('trips.list_view') }}" class="{{ 'active' if request.blueprint == 'trips' }}">الرحلات</a>
+      <a href="{{ url_for('vehicles.list_view') }}" class="{{ 'active' if request.blueprint == 'vehicles' }}">العربيات</a>
+      <a href="{{ url_for('customers.list_view') }}" class="{{ 'active' if request.blueprint == 'customers' }}">العملاء</a>
+      <a href="{{ url_for('drivers.list_view') }}" class="{{ 'active' if request.blueprint == 'drivers' }}">السواقين</a>
+      <a href="{{ url_for('owners.list_view') }}" class="{{ 'active' if request.blueprint == 'owners' }}">أصحاب العربيات</a>
+      <a href="{{ url_for('reports.view_report', name='fuel') }}" class="{{ 'active' if request.endpoint == 'reports.view_report' and request.view_args.get('name') == 'fuel' }}">السولار</a>
+      <a href="{{ url_for('finance.maintenance_list') }}" class="{{ 'active' if request.endpoint and 'maintenance' in request.endpoint }}">الصيانة</a>
+      <a href="{{ url_for('finance.expenses_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('finance.expenses') }}">المصاريف</a>
+      <a href="{{ url_for('main.collection') }}" class="{{ 'active' if request.endpoint == 'main.collection' }}">التحصيل</a>
+      <a href="{{ url_for('reports.index') }}" class="{{ 'active' if request.blueprint == 'reports' }}">التقارير</a>
+      <a href="{{ url_for('main.settings') }}" class="{{ 'active' if request.endpoint == 'main.settings' }}">الإعدادات</a>
+      <a href="{{ url_for('main.backup_page') }}" class="{{ 'active' if request.endpoint == 'main.backup_page' }}">نسخة احتياطية</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

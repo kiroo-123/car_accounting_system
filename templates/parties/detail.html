@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "macros.html" import stat_card, stat_card_number, confirm_delete_form, pay_form, data_table %}
+{% block title %}{{ s.entity.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ s.entity.name }}</h1>
+    {% if s.entity.phone %}<p class="page-subtitle">{{ s.entity.phone }}</p>{% endif %}
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for(cfg.endpoint ~ '.edit_view', item_id=item_id) }}" class="btn btn-secondary">تعديل</a>
+    {{ confirm_delete_form(url_for(cfg.endpoint ~ '.delete_view', item_id=item_id), 'حذف') }}
+  </div>
+</div>
+
+<div class="stat-grid">
+  {{ stat_card_number('عدد الرحلات', s.trip_count, 'neutral') }}
+  {{ stat_card(cfg.dues_label, s.total_dues, 'neutral') }}
+  {{ stat_card(cfg.collected_label, s.total_collected, 'neutral') }}
+  {{ stat_card('المتبقي', s.remaining, 'due' if s.remaining > 0 else 'neutral') }}
+</div>
+
+<div class="detail-grid two-col">
+
+  <div>
+    <h2 class="section-title">تفاصيل الرحلات</h2>
+    {% set cols = [
+      {'key':'date','label':'التاريخ'},
+      {'key':'id','label':'رقم الرحلة'},
+      {'key':'vehicle_name','label':'العربية'},
+    ] %}
+    {% if cfg.endpoint == 'customers' %}
+      {% set cols = cols + [{'key':'driver_name','label':'السواق'}] %}
+    {% endif %}
+    {% if cfg.endpoint == 'owners' %}
+      {% set cols = cols + [{'key':'customer_name','label':'العميل'}] %}
+    {% endif %}
+    {% if cfg.endpoint == 'drivers' %}
+      {% set cols = cols + [{'key':'customer_name','label':'العميل'}] %}
+    {% endif %}
+    {% set cols = cols + [{'key':'amount','label':cfg.amount_label,'format':'currency'}] %}
+    {{ data_table(cols, s.trips, empty_message='مفيش رحلات مسجلة لسه.') }}
+  </div>
+
+  <div>
+    <h2 class="section-title">سجل الدفعات</h2>
+    {% if s.payments %}
+    <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>التاريخ</th><th>المبلغ</th><th>طريقة الدفع</th><th>ملاحظات</th></tr></thead>
+      <tbody>
+        {% for p in s.payments %}
+        <tr>
+          <td>{{ p.date }}</td>
+          <td class="num">{{ p.amount | currency }}</td>
+          <td>{{ p.method or 'كاش' }}</td>
+          <td>{{ p.notes or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="empty-row">مفيش دفعات مسجلة لسه.</p>
+    {% endif %}
+
+    <h2 class="section-title">{{ cfg.pay_label }}</h2>
+    {{ pay_form(url_for(cfg.endpoint ~ '.pay_view', item_id=item_id), cfg.pay_label) }}
+  </div>
+
+</div>
+{% endblock %}

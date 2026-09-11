@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty_state, confirm_delete_form %}
+{% block title %}الصيانة{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>سجل الصيانة</h1>
+    <p class="page-subtitle">إجمالي مصاريف الصيانة: {{ total | currency }}</p>
+  </div>
+  <a href="{{ url_for('finance.maintenance_add') }}" class="btn btn-primary btn-lg">+ تسجيل صيانة</a>
+</div>
+
+<form method="GET" class="filter-bar">
+  <select name="vehicle_id">
+    <option value="">كل العربيات</option>
+    {% for v in vehicles %}
+    <option value="{{ v.id }}" {{ 'selected' if vehicle_id == v.id|string }}>{{ v.code_name or v.plate_number }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary">فلترة</button>
+  {% if vehicle_id %}<a href="{{ url_for('finance.maintenance_list') }}" class="btn btn-ghost">عرض الكل</a>{% endif %}
+</form>
+
+{% if rows %}
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>التاريخ</th><th>العربية</th><th>نوع المصروف</th><th>الوصف</th><th>المبلغ</th><th>إجراءات</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.date }}</td>
+      <td>{{ r.vehicle_name }}</td>
+      <td>{{ r.expense_type }}</td>
+      <td>{{ r.description or '-' }}</td>
+      <td class="num">{{ r.amount | currency }}</td>
+      <td class="actions-cell">
+        <a href="{{ url_for('finance.maintenance_edit', item_id=r.id) }}" class="btn btn-ghost btn-sm">تعديل</a>
+        {{ confirm_delete_form(url_for('finance.maintenance_delete', item_id=r.id), 'حذف') }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+{{ empty_state('مفيش مصاريف صيانة مسجلة لسه.', 'تسجيل صيانة', url_for('finance.maintenance_add')) }}
+{% endif %}
+{% endblock %}

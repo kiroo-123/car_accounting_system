@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "macros.html" import data_table %}
+{% block title %}التحصيل{% endblock %}
+{% block content %}
+<div class="page-header"><h1>صفحة التحصيل</h1></div>
+
+<h2 class="section-title">موقف العملاء</h2>
+<div class="table-wrap">
+<table class="data-table clickable">
+  <thead><tr><th>العميل</th><th>عدد الرحلات</th><th>إجمالي المستحق</th><th>المحصّل</th><th>المتبقي</th></tr></thead>
+  <tbody>
+    {% for r in report.customers %}
+    <tr onclick="location.href='{{ url_for('customers.detail_view', item_id=r.id) }}'">
+      <td>{{ r.name }}</td>
+      <td class="num">{{ r.trip_count }}</td>
+      <td class="num">{{ r.total_dues | currency }}</td>
+      <td class="num">{{ r.collected | currency }}</td>
+      <td class="num {{ 'text-loss' if r.remaining > 0 else '' }}">{{ r.remaining | currency }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="empty-row">مفيش عملاء مسجلين</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">موقف أصحاب العربيات</h2>
+<div class="table-wrap">
+<table class="data-table clickable">
+  <thead><tr><th>صاحب العربية</th><th>عدد الرحلات</th><th>إجمالي المستحق</th><th>المدفوع</th><th>المتبقي</th></tr></thead>
+  <tbody>
+    {% for r in report.owners %}
+    <tr onclick="location.href='{{ url_for('owners.detail_view', item_id=r.id) }}'">
+      <td>{{ r.name }}</td>
+      <td class="num">{{ r.trip_count }}</td>
+      <td class="num">{{ r.total_dues | currency }}</td>
+      <td class="num">{{ r.collected | currency }}</td>
+      <td class="num {{ 'text-loss' if r.remaining > 0 else '' }}">{{ r.remaining | currency }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="empty-row">مفيش أصحاب عربيات مسجلين</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">موقف السواقين</h2>
+<div class="table-wrap">
+<table class="data-table clickable">
+  <thead><tr><th>السواق</th><th>عدد الرحلات</th><th>إجمالي المستحق</th><th>المدفوع</th><th>المتبقي</th></tr></thead>
+  <tbody>
+    {% for r in report.drivers %}
+    <tr onclick="location.href='{{ url_for('drivers.detail_view', item_id=r.id) }}'">
+      <td>{{ r.name }}</td>
+      <td class="num">{{ r.trip_count }}</td>
+      <td class="num">{{ r.total_dues | currency }}</td>
+      <td class="num">{{ r.collected | currency }}</td>
+      <td class="num {{ 'text-loss' if r.remaining > 0 else '' }}">{{ r.remaining | currency }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="empty-row">مفيش سواقين مسجلين</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

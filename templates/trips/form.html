@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}{{ 'إضافة رحلة' if mode == 'add' else 'تعديل رحلة' }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ 'إضافة رحلة جديدة' if mode == 'add' else 'تعديل رحلة رقم #' ~ trip_id }}</h1>
+</div>
+
+<form method="POST" class="card form-card" id="tripForm">
+  <div class="form-section-title">بيانات الرحلة الأساسية</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>التاريخ *</label>
+      <input type="date" name="date" required value="{{ values.date or today }}">
+    </div>
+    <div class="form-group">
+      <label>العميل *</label>
+      <select name="customer_id" required>
+        <option value="">اختار العميل</option>
+        {% for c in lookup.customers %}
+        <option value="{{ c.id }}" {{ 'selected' if values.customer_id|string == c.id|string }}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>العربية *</label>
+      <select name="vehicle_id" id="vehicle_id" required>
+        <option value="">اختار العربية</option>
+        {% for v in lookup.vehicles %}
+        <option value="{{ v.id }}" {{ 'selected' if values.vehicle_id|string == v.id|string }}>
+          {{ v.code_name or v.plate_number }} ({{ 'ملك الشركة' if v.ownership_type == 'company' else 'عربية حرة' }})
+        </option>
+        {% endfor %}
+      </select>
+      <span class="field-hint" id="owner_hint"></span>
+    </div>
+    <div class="form-group">
+      <label>السواق</label>
+      <select name="driver_id">
+        <option value="">اختار السواق (اختياري)</option>
+        {% for d in lookup.drivers %}
+        <option value="{{ d.id }}" {{ 'selected' if values.driver_id|string == d.id|string }}>{{ d.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-section-title">الأسعار والأجور</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>سعر الرحلة من العميل (جنيه) *</label>
+      <input type="number" min="0" step="0.01" name="trip_price" id="trip_price" required value="{{ values.trip_price or '' }}" placeholder="0">
+    </div>
+    <div class="form-group" id="owner_fee_group">
+      <label>أجرة صاحب العربية (جنيه)</label>
+      <input type="number" min="0" step="0.01" name="owner_fee" id="owner_fee" value="{{ values.owner_fee or '' }}" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>أجر السواق (جنيه)</label>
+      <input type="number" min="0" step="0.01" name="driver_fee" id="driver_fee" value="{{ values.driver_fee or '' }}" placeholder="0">
+    </div>
+  </div>
+
+  <div class="form-section-title">السولار</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>عدد اللترات</label>
+      <input type="number" min="0" step="0.01" name="fuel_liters" id="fuel_liters" value="{{ values.fuel_liters or '' }}" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>سعر اللتر (جنيه)</label>
+      <input type="number" min="0" step="0.01" name="fuel_price_per_liter" id="fuel_price_per_liter" value="{{ values.fuel_price_per_liter or '' }}" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>تكلفة السولار (بتتحسب تلقائيًا)</label>
+      <input type="text" id="fuel_cost_display" disabled value="0 جنيه">
+    </div>
+  </div>
+
+  <div class="form-section-title">الكارتة والعمولة</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>تعبئة الكارتة من مسار محفوظ (اختياري)</label>
+      <select id="route_preset">
+        <option value="">— بدون —</option>
+        {% for r in toll_routes %}
+        <option value="{{ r.key }}">{{ r.key }} ({{ r.value | numfmt }} جنيه)</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>الكارتة (جنيه)</label>
+      <input type="number" min="0" step="0.01" name="toll_cost" id="toll_cost" value="{{ values.toll_cost or '' }}" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>العمولة (جنيه) — معلوماتية</label>
+      <input type="number" min="0" step="0.01" name="commission" id="commission" value="{{ values.commission or '' }}" placeholder="0">
+    </div>
+  </div>
+  <input type="hidden" name="route_name" id="route_name" value="{{ values.route_name or '' }}">
+
+  <div class="form-group">
+    <label>ملاحظات</label>
+    <textarea name="notes" rows="2" placeholder="أي ملاحظات إضافية">{{ values.notes or '' }}</textarea>
+  </div>
+
+  <div class="calc-summary">
+    <div class="calc-row"><span>إجمالي تكلفة الرحلة</span><strong id="calc-total-cost">0 جنيه</strong></div>
+    <div class="calc-row calc-highlight"><span>صافي ربح الرحلة</span><strong id="calc-net-profit">0 جنيه</strong></div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary btn-lg">{{ 'حفظ الرحلة' if mode == 'add' else 'حفظ التعديلات' }}</button>
+    <a href="{{ url_for('trips.list_view') }}" class="btn btn-ghost">إلغاء</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.__vehiclesMap = {{ vehicles_map | safe }};
+  window.__tollMap = {{ toll_map | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/trip_form.js') }}"></script>
+{% endblock %}

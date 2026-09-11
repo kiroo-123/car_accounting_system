@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "macros.html" import stat_card, data_table %}
+{% block title %}تقرير التحصيل{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>تقرير التحصيل</h1>
+  <a href="{{ url_for('reports.export_report', name='collection') }}" class="btn btn-secondary">⬇ تصدير Excel</a>
+</div>
+
+<h2 class="section-title">موقف العملاء</h2>
+{{ data_table(
+  [{'key':'name','label':'العميل'}, {'key':'trip_count','label':'رحلات','format':'number'},
+   {'key':'total_dues','label':'إجمالي المستحق','format':'currency'},
+   {'key':'collected','label':'المحصّل','format':'currency'},
+   {'key':'remaining','label':'المتبقي','format':'currency'}],
+  report.customers
+) }}
+
+<h2 class="section-title">موقف أصحاب العربيات</h2>
+{{ data_table(
+  [{'key':'name','label':'صاحب العربية'}, {'key':'trip_count','label':'رحلات','format':'number'},
+   {'key':'total_dues','label':'إجمالي المستحق','format':'currency'},
+   {'key':'collected','label':'المدفوع','format':'currency'},
+   {'key':'remaining','label':'المتبقي','format':'currency'}],
+  report.owners
+) }}
+
+<h2 class="section-title">موقف السواقين</h2>
+{{ data_table(
+  [{'key':'name','label':'السواق'}, {'key':'trip_count','label':'رحلات','format':'number'},
+   {'key':'total_dues','label':'إجمالي المستحق','format':'currency'},
+   {'key':'collected','label':'المدفوع','format':'currency'},
+   {'key':'remaining','label':'المتبقي','format':'currency'}],
+  report.drivers
+) }}
+{% endblock %}

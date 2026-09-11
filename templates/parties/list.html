@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty_state %}
+{% block title %}{{ cfg.title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ cfg.title }}</h1>
+    <p class="page-subtitle">{{ items|length }} {{ cfg.singular }}</p>
+  </div>
+  <a href="{{ url_for(cfg.endpoint ~ '.add_view') }}" class="btn btn-primary btn-lg">+ إضافة {{ cfg.singular }}</a>
+</div>
+
+<form method="GET" class="filter-bar">
+  <input type="text" name="q" placeholder="ابحث بالاسم أو رقم الهاتف..." value="{{ search }}">
+  <button type="submit" class="btn btn-secondary">بحث</button>
+  {% if search %}<a href="{{ url_for(cfg.endpoint ~ '.list_view') }}" class="btn btn-ghost">مسح</a>{% endif %}
+</form>
+
+{% if items %}
+<div class="table-wrap">
+<table class="data-table clickable">
+  <thead>
+    <tr>
+      <th>الاسم</th>
+      <th>رقم الهاتف</th>
+      <th>ملاحظات</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr onclick="location.href='{{ url_for(cfg.endpoint ~ '.detail_view', item_id=item.id) }}'">
+      <td>{{ item.name }}</td>
+      <td>{{ item.phone or '-' }}</td>
+      <td>{{ item.notes or '-' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+{{ empty_state('مفيش ' ~ cfg.title ~ ' مسجلين لسه.', 'إضافة ' ~ cfg.singular, url_for(cfg.endpoint ~ '.add_view')) }}
+{% endif %}
+{% endblock %}

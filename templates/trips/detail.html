@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "macros.html" import confirm_delete_form %}
+{% block title %}رحلة #{{ ctx.trip.id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>رحلة رقم #{{ ctx.trip.id }}</h1>
+    <p class="page-subtitle">{{ ctx.trip.date }} — {{ ctx.customer.name if ctx.customer else 'عميل محذوف' }}</p>
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for('trips.edit_view', trip_id=ctx.trip.id) }}" class="btn btn-secondary">تعديل</a>
+    {{ confirm_delete_form(url_for('trips.delete_view', trip_id=ctx.trip.id), 'حذف الرحلة') }}
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="card info-card">
+    <div class="info-row"><span>العميل</span><strong>{{ ctx.customer.name if ctx.customer else '-' }}</strong></div>
+    <div class="info-row"><span>العربية</span><strong>{{ (ctx.vehicle.code_name or ctx.vehicle.plate_number) if ctx.vehicle else '-' }} ({{ 'ملك الشركة' if ctx.vehicle and ctx.vehicle.ownership_type == 'company' else 'عربية حرة' }})</strong></div>
+    {% if ctx.owner %}<div class="info-row"><span>صاحب العربية</span><strong>{{ ctx.owner.name }}</strong></div>{% endif %}
+    <div class="info-row"><span>السواق</span><strong>{{ ctx.driver.name if ctx.driver else '-' }}</strong></div>
+    {% if ctx.trip.route_name %}<div class="info-row"><span>المسار</span><strong>{{ ctx.trip.route_name }}</strong></div>{% endif %}
+    {% if ctx.trip.notes %}<div class="info-row"><span>ملاحظات</span><strong>{{ ctx.trip.notes }}</strong></div>{% endif %}
+  </div>
+
+  <div class="card breakdown-card">
+    <div class="breakdown-title">حساب صافي ربح الرحلة</div>
+    <div class="breakdown-row plus"><span>إيراد الرحلة (من العميل)</span><strong>{{ ctx.fin.revenue | currency }}</strong></div>
+    <div class="breakdown-row minus"><span>السولار ({{ ctx.fin.fuel_liters | numfmt }} لتر × {{ ctx.fin.fuel_price_per_liter | currency }})</span><strong>− {{ ctx.fin.fuel_cost | currency }}</strong></div>
+    <div class="breakdown-row minus"><span>الكارتة</span><strong>− {{ ctx.fin.toll_cost | currency }}</strong></div>
+    <div class="breakdown-row minus"><span>أجر السواق</span><strong>− {{ ctx.fin.driver_fee | currency }}</strong></div>
+    {% if ctx.vehicle and ctx.vehicle.ownership_type == 'free' %}
+    <div class="breakdown-row minus"><span>أجرة صاحب العربية</span><strong>− {{ ctx.fin.owner_fee | currency }}</strong></div>
+    {% endif %}
+    <div class="breakdown-divider"></div>
+    <div class="breakdown-row total {{ 'text-profit' if ctx.fin.net_profit >= 0 else 'text-loss' }}">
+      <span>صافي ربح الرحلة</span><strong>{{ ctx.fin.net_profit | currency }}</strong>
+    </div>
+    {% if ctx.fin.commission %}
+    <p class="breakdown-note">ملحوظة: من ضمن صافي الربح ده، {{ ctx.fin.commission | currency }} متسجلة كعمولة الشركة مقابل توفير العربية — دي قيمة معلوماتية جزء من الرقم اللي فوق، مش بند بيتضاف عليه.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

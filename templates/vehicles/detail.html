@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "macros.html" import stat_card, stat_card_number, badge, confirm_delete_form, data_table %}
+{% block title %}{{ s.vehicle.code_name or s.vehicle.plate_number }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ s.vehicle.code_name or s.vehicle.plate_number }} {{ badge('ملك الشركة' if s.vehicle.ownership_type == 'company' else 'عربية حرة', 'company' if s.vehicle.ownership_type == 'company' else 'free') }}</h1>
+    <p class="page-subtitle">
+      {{ s.vehicle.plate_number }} — {{ s.vehicle.vehicle_type or '-' }} — {{ s.vehicle.capacity or '-' }}
+      {% if s.owner_name %} — صاحبها: <a href="{{ url_for('owners.detail_view', item_id=s.owner_id) }}">{{ s.owner_name }}</a>{% endif %}
+    </p>
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for('vehicles.edit_view', vehicle_id=s.vehicle.id) }}" class="btn btn-secondary">تعديل</a>
+    <a href="{{ url_for('finance.maintenance_add', vehicle_id=s.vehicle.id) }}" class="btn btn-secondary">+ صيانة</a>
+    {{ confirm_delete_form(url_for('vehicles.delete_view', vehicle_id=s.vehicle.id), 'حذف العربية') }}
+  </div>
+</div>
+
+<div class="stat-grid">
+  {{ stat_card_number('عدد الرحلات', s.trip_count, 'neutral') }}
+  {{ stat_card('إجمالي الإيرادات', s.revenue, 'neutral') }}
+  {{ stat_card('السولار', s.fuel_cost, 'due') }}
+  {{ stat_card('الكارتة', s.toll_cost, 'due') }}
+  {{ stat_card('أجور السواقين', s.driver_cost, 'due') }}
+  {% if s.vehicle.ownership_type == 'free' %}{{ stat_card('أجرة صاحب العربية', s.owner_cost, 'due') }}{% endif %}
+  {{ stat_card('الصيانة', s.maintenance_cost, 'due') }}
+  {{ stat_card('إجمالي التكلفة', s.total_cost, 'due') }}
+  {{ stat_card('صافي الربح', s.net_profit, 'profit' if s.net_profit >= 0 else 'loss') }}
+</div>
+
+<h2 class="section-title">رحلات العربية</h2>
+{% set trip_cols = [
+  {'key':'date','label':'التاريخ'}, {'key':'id','label':'رقم الرحلة'},
+  {'key':'customer_name','label':'العميل'}, {'key':'driver_name','label':'السواق'},
+  {'key':'revenue','label':'الإيراد','format':'currency'}, {'key':'fuel_cost','label':'السولار','format':'currency'},
+  {'key':'toll_cost','label':'الكارتة','format':'currency'}, {'key':'driver_fee','label':'أجر السواق','format':'currency'},
+] %}
+{% if s.vehicle.ownership_type == 'free' %}
+  {% set trip_cols = trip_cols + [{'key':'owner_fee','label':'أجرة صاحب العربية','format':'currency'}] %}
+{% endif %}
+{% set trip_cols = trip_cols + [{'key':'net_profit','label':'صافي الربح','format':'currency'}] %}
+{{ data_table(trip_cols, s.trips, empty_message='مفيش رحلات مسجلة للعربية دي لسه.') }}
+
+<h2 class="section-title">سجل الصيانة</h2>
+{{ data_table(
+  [{'key':'date','label':'التاريخ'}, {'key':'expense_type','label':'نوع المصروف'}, {'key':'description','label':'الوصف'}, {'key':'amount','label':'المبلغ','format':'currency'}],
+  s.maintenance, empty_message='مفيش مصاريف صيانة مسجلة للعربية دي لسه.'
+) }}
+{% endblock %}

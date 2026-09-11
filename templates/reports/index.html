@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}التقارير{% endblock %}
+{% block content %}
+<div class="page-header"><h1>التقارير</h1></div>
+<div class="card-grid">
+  {% for key, title, desc in reports %}
+  <a href="{{ url_for('reports.view_report', name=key) }}" class="report-card">
+    <span class="report-title">{{ title }}</span>
+    <span class="report-desc">{{ desc }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

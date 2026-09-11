@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "macros.html" import stat_card, stat_card_number %}
+{% block title %}الرئيسية{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>أهلاً بيك 👋</h1>
+    <p class="page-subtitle">ده الوضع المالي للشركة لحد النهاردة</p>
+  </div>
+  <a href="{{ url_for('trips.add_view') }}" class="btn btn-primary btn-lg">+ إضافة رحلة</a>
+</div>
+
+<section class="hero-block tone-{{ 'profit' if data.today.net_profit >= 0 else 'loss' }}">
+  <span class="hero-label">صافي ربح اليوم</span>
+  <span class="hero-value">{{ data.today.net_profit | currency }}</span>
+  <div class="hero-sub-row">
+    <span>إيرادات اليوم: <strong>{{ data.today.revenue | currency }}</strong></span>
+    <span>مصروفات اليوم: <strong>{{ data.today.expenses | currency }}</strong></span>
+    <span>عدد رحلات اليوم: <strong>{{ data.today.trip_count | numfmt }}</strong></span>
+  </div>
+</section>
+
+<h2 class="section-title">ملخص الشهر</h2>
+<div class="stat-grid">
+  {{ stat_card('إجمالي الإيرادات', data.month.revenue, 'neutral') }}
+  {{ stat_card('إجمالي المصروفات', data.month.expenses, 'neutral') }}
+  {{ stat_card('صافي الربح', data.month.net_profit, 'profit' if data.month.net_profit >= 0 else 'loss') }}
+  {{ stat_card('المبالغ المحصّلة', data.month.collected, 'neutral') }}
+  {{ stat_card_number('عدد رحلات الشهر', data.month.trip_count, 'neutral') }}
+</div>
+
+<h2 class="section-title">المستحقات الحالية</h2>
+<div class="stat-grid">
+  {{ stat_card('مستحق من العملاء', data.dues.customer_dues, 'due', 'اللي لسه هيدفعوه العملاء') }}
+  {{ stat_card('مستحق لأصحاب العربيات', data.dues.owner_dues, 'due', 'اللي لازم يتدفع لأصحاب العربيات') }}
+  {{ stat_card('مستحق للسواقين', data.dues.driver_dues, 'due', 'اللي لازم يتدفع للسواقين') }}
+</div>
+
+<h2 class="section-title">الأسطول</h2>
+<div class="stat-grid">
+  {{ stat_card_number('عربيات ملك الشركة', data.fleet.company_vehicles, 'neutral') }}
+  {{ stat_card_number('عربيات حرة', data.fleet.free_vehicles, 'neutral') }}
+</div>
+
+<div class="quick-links">
+  <a href="{{ url_for('reports.view_report', name='profit') }}" class="quick-link">تقرير الأرباح الشهري</a>
+  <a href="{{ url_for('main.collection') }}" class="quick-link">صفحة التحصيل</a>
+  <a href="{{ url_for('reports.index') }}" class="quick-link">كل التقارير</a>
+</div>
+{% endblock %}

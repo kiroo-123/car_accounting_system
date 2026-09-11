@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "macros.html" import data_table, empty_state %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ title }}</h1>
+  <a href="{{ url_for('reports.export_report', name=name, **filters) }}" class="btn btn-secondary">⬇ تصدير Excel</a>
+</div>
+
+{% if name in ('trips', 'expenses') %}
+<form method="GET" class="filter-bar">
+  <input type="date" name="date_from" value="{{ filters.get('date_from','') }}" title="من تاريخ">
+  <input type="date" name="date_to" value="{{ filters.get('date_to','') }}" title="إلى تاريخ">
+  <button type="submit" class="btn btn-secondary">فلترة</button>
+  {% if filters %}<a href="{{ url_for('reports.view_report', name=name) }}" class="btn btn-ghost">مسح</a>{% endif %}
+</form>
+{% endif %}
+
+{% if stat_cards %}
+<div class="stat-grid">
+  {% for card in stat_cards %}
+  <div class="stat-card tone-neutral">
+    <span class="stat-label">{{ card.label }}</span>
+    <span class="stat-value">
+      {% if card.amount is defined %}{{ card.amount | currency }}
+      {% elif card.text is defined %}{{ card.text }}
+      {% endif %}
+    </span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if rows %}
+{{ data_table(columns, rows, totals) }}
+{% else %}
+{{ empty_state('مفيش بيانات لعرضها في التقرير ده.') }}
+{% endif %}
+{% endblock %}

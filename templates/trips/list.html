@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty_state %}
+{% block title %}الرحلات{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>الرحلات</h1>
+    <p class="page-subtitle">{{ trips|length }} رحلة — إجمالي الإيراد {{ total_revenue | currency }} — صافي الربح {{ total_profit | currency }}</p>
+  </div>
+  <a href="{{ url_for('trips.add_view') }}" class="btn btn-primary btn-lg">+ إضافة رحلة</a>
+</div>
+
+<form method="GET" class="filter-bar">
+  <input type="text" name="q" placeholder="ابحث برقم الرحلة أو المسار..." value="{{ filters.get('q','') }}">
+  <input type="date" name="date_from" value="{{ filters.get('date_from','') }}" title="من تاريخ">
+  <input type="date" name="date_to" value="{{ filters.get('date_to','') }}" title="إلى تاريخ">
+  <select name="customer_id">
+    <option value="">كل العملاء</option>
+    {% for c in lookup.customers %}<option value="{{ c.id }}" {{ 'selected' if filters.get('customer_id')|string == c.id|string }}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <select name="vehicle_id">
+    <option value="">كل العربيات</option>
+    {% for v in lookup.vehicles %}<option value="{{ v.id }}" {{ 'selected' if filters.get('vehicle_id')|string == v.id|string }}>{{ v.code_name or v.plate_number }}</option>{% endfor %}
+  </select>
+  <select name="driver_id">
+    <option value="">كل السواقين</option>
+    {% for d in lookup.drivers %}<option value="{{ d.id }}" {{ 'selected' if filters.get('driver_id')|string == d.id|string }}>{{ d.name }}</option>{% endfor %}
+  </select>
+  <select name="owner_id">
+    <option value="">كل أصحاب العربيات</option>
+    {% for o in lookup.owners %}<option value="{{ o.id }}" {{ 'selected' if filters.get('owner_id')|string == o.id|string }}>{{ o.name }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary">فلترة</button>
+  {% if filters %}<a href="{{ url_for('trips.list_view') }}" class="btn btn-ghost">مسح الفلاتر</a>{% endif %}
+</form>
+
+{% if trips %}
+<div class="table-wrap">
+<table class="data-table clickable">
+  <thead>
+    <tr>
+      <th>رقم الرحلة</th><th>التاريخ</th><th>العميل</th><th>العربية</th><th>السواق</th>
+      <th>سعر الرحلة</th><th>إجمالي التكلفة</th><th>صافي الربح</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in trips %}
+    <tr onclick="location.href='{{ url_for('trips.detail_view', trip_id=t.id) }}'">
+      <td>#{{ t.id }}</td>
+      <td>{{ t.date }}</td>
+      <td>{{ t.customer_name }}</td>
+      <td>{{ t.vehicle_name }}</td>
+      <td>{{ t.driver_name }}</td>
+      <td class="num">{{ t.revenue | currency }}</td>
+      <td class="num">{{ t.total_cost | currency }}</td>
+      <td class="num {{ 'text-profit' if t.net_profit >= 0 else 'text-loss' }}">{{ t.net_profit | currency }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+{{ empty_state('مفيش رحلات مسجلة لسه بالفلاتر دي.', 'إضافة رحلة', url_for('trips.add_view')) }}
+{% endif %}
+{% endblock %}

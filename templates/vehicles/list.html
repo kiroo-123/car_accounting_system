@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty_state, badge %}
+{% block title %}العربيات{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>العربيات</h1>
+    <p class="page-subtitle">{{ vehicles|length }} عربية</p>
+  </div>
+  <a href="{{ url_for('vehicles.add_view') }}" class="btn btn-primary btn-lg">+ إضافة عربية</a>
+</div>
+
+<form method="GET" class="filter-bar">
+  <input type="text" name="q" placeholder="ابحث برقم اللوحة أو الاسم..." value="{{ search }}">
+  <select name="ownership_type">
+    <option value="">كل الأنواع</option>
+    <option value="company" {{ 'selected' if ownership == 'company' }}>ملك الشركة</option>
+    <option value="free" {{ 'selected' if ownership == 'free' }}>عربية حرة</option>
+  </select>
+  <button type="submit" class="btn btn-secondary">فلترة</button>
+</form>
+
+{% if vehicles %}
+<div class="card-grid">
+  {% for v in vehicles %}
+  <a href="{{ url_for('vehicles.detail_view', vehicle_id=v.id) }}" class="vehicle-card">
+    <div class="vehicle-card-top">
+      <span class="vehicle-name">{{ v.code_name or v.plate_number }}</span>
+      {{ badge(v.ownership_label, 'company' if v.ownership_type == 'company' else 'free') }}
+    </div>
+    <div class="vehicle-card-plate">{{ v.plate_number }}</div>
+    <div class="vehicle-card-meta">
+      <span>{{ v.vehicle_type or '-' }}</span>
+      <span>{{ v.capacity or '-' }}</span>
+    </div>
+    {% if v.owner_name %}<div class="vehicle-card-owner">صاحبها: {{ v.owner_name }}</div>{% endif %}
+    <div class="vehicle-card-status">{{ v.status or 'نشطة' }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty_state('مفيش عربيات مسجلة لسه.', 'إضافة عربية', url_for('vehicles.add_view')) }}
+{% endif %}
+{% endblock %}

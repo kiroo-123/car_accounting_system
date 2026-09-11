@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}الإعدادات{% endblock %}
+{% block content %}
+<div class="page-header"><h1>الإعدادات</h1></div>
+
+<div class="settings-sections">
+
+  <div class="card form-card">
+    <h2 class="section-title">اسم الشركة</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="set_company_name">
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <input type="text" name="company_name" value="{{ company_name }}" required placeholder="اسم الشركة">
+        </div>
+        <button type="submit" class="btn btn-primary">حفظ</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card form-card">
+    <h2 class="section-title">مسارات الكارتة</h2>
+    {% if toll_routes %}
+    <ul class="simple-list">
+      {% for r in toll_routes %}<li>{{ r.key }} — {{ r.value | currency }}</li>{% endfor %}
+    </ul>
+    {% else %}<p class="muted">مفيش مسارات مضافة لسه.</p>{% endif %}
+    <form method="POST" class="inline-add-form">
+      <input type="hidden" name="action" value="add_toll_route">
+      <div class="form-row">
+        <input type="text" name="route_name" placeholder="اسم المسار (مثال: القاهرة - العاشر)" required>
+        <input type="number" min="0" step="0.01" name="toll_price" placeholder="سعر الكارتة (جنيه)" required>
+        <button type="submit" class="btn btn-secondary">إضافة</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card form-card">
+    <h2 class="section-title">أنواع مصاريف الصيانة</h2>
+    <ul class="simple-list">{% for t in maintenance_types %}<li>{{ t }}</li>{% endfor %}</ul>
+    <form method="POST" class="inline-add-form">
+      <input type="hidden" name="action" value="add_maintenance_type">
+      <div class="form-row">
+        <input type="text" name="type_name" placeholder="نوع جديد للمصروف" required>
+        <button type="submit" class="btn btn-secondary">إضافة</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card form-card">
+    <h2 class="section-title">أنواع المصاريف العامة</h2>
+    <ul class="simple-list">{% for t in general_expense_types %}<li>{{ t }}</li>{% endfor %}</ul>
+    <form method="POST" class="inline-add-form">
+      <input type="hidden" name="action" value="add_general_expense_type">
+      <div class="form-row">
+        <input type="text" name="type_name" placeholder="نوع مصروف عام جديد" required>
+        <button type="submit" class="btn btn-secondary">إضافة</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card form-card danger-zone">
+    <h2 class="section-title">إعادة تهيئة النظام</h2>
+    <p class="warning-text">⚠️ التحذير: هيتم مسح كل البيانات. هيتعمل نسخة احتياطية أوتوماتيكي قبل المسح.</p>
+    <form method="POST" action="{{ url_for('main.system_reset') }}" onsubmit="return confirm('متأكد؟ هيتم مسح كل البيانات وبدء من الأول!');">
+      <div class="form-row">
+        <div class="form-group">
+          <label>اكتب "متأكد" للتأكيد</label>
+          <input type="text" name="confirm_text" placeholder="متأكد" required>
+        </div>
+        <div class="form-group" style="align-self:center">
+          <label><input type="checkbox" name="load_demo" value="1"> تحميل بيانات تجريبية بعد المسح</label>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-danger">إعادة التهيئة</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
